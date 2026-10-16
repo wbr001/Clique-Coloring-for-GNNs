@@ -1,0 +1,66 @@
+\section{Networks with Low Depth and High Width}
+
+
+\section{Exact LP Formulation}
+
+%TODO make notation as consistent with SAT as possible 
+
+
+\subsection*{1) Parameters}
+\begin{itemize}
+    \item Dataset variables $x_{i,j}$: binary variable, 1 if and only if bit $j$ of string $i$ is equal to 1. 
+    \item Dataset variables $t_{i}$: binary variable, 0 if string i belongs to class 0.
+    \item depth $d$: Number of layers. 
+    \item layer widths $w_l,  \forall l \in [\delta]$: Width of layer $l$. First width is equal to the input width. The last width is the output width.
+\end{itemize}
+
+\subsection*{2) Decision Variables}
+\begin{itemize}
+   \item  Threshold $g_{l,j}: \in \mathbb{N} \ |\  \mathbb{R}$ Decision variable for the threshold of each node $j$ at layer $l$. \\
+   \item  weights $e_{l,j,j'}: \in \mathbb{N} \ |\  \mathbb{R}$  Decision variable for the weight of the edge from node $j$ in layer $l$ to node $j'$ in layer  $l+1$. \\ 
+\end{itemize}
+
+\subsection*{3) Auxiliary Variables}
+\begin{itemize}
+    \item Threshold reached $c_{l,j,i}$: Binary variable indicating whether node $j$ at layer $l$ fires for string $i$. \\ 
+    \item wrong $m_i$: Binary variable indicating whether the prediction for string $i$ is wrong.
+\end{itemize}
+
+
+
+
+\subsection*{4) Constraints}
+In the following constraints, M represents the upper bound of the left hand side. %TODO write explanation of each constraint
+\begin{align*}
+    &\sum_{j \in w_l} \left(\text{c}_{l,j,i} \times \text{e}_{l,j,j'}\right) - \text{g}_{l+1,j'} \leq M \times \text{c}_{l+1,j',i}, \quad \forall j' \in w_{l+1}, \forall i \in N, \\
+    %
+    &\sum_{j \in w_l} \left(\text{c}_{l,j,i} \times \text{e}_{l,j,j'}) - \text{g}_{l+1,j'} \geq 1 - M \times (1 - \text{c}_{l+1,j',i}\right), \quad \forall j' \in W, \forall i \in N, \\
+    %
+    &\text{c}_{1,j,i} = \text{x}_{i,j}, \quad \forall j \in w_1, \forall i \in N, \\
+    %
+    &\text{m}_i \geq \text{c}_{d,j',i} - \text{t}_i, \quad \forall i \in N, \\
+    %
+    &\text{m}_i \geq \text{t}_i - \text{c}_{d,j',i}, \quad \forall i \in N, \\
+    %
+    &\sum_{i \in N} m_i \leq \epsilon.
+\end{align*}
+
+By setting $\epsilon = 0$ the exact formulation is achieved. 
+
+
+\subsection*{5) Objective Function}
+If the exact formulation is used, no objective is needed. For the inexact formulation it can be useful to minimize the number of wrong classifications.
+\begin{equation*}
+    \text{minimize} \quad \sum_{n \in N} \text{wrong}_n
+\end{equation*}
+
+\begin{problem}
+Formulate the problem of learning a Threshold network consistent with a given dataset as an LP program. This is essentially the same formulation as above, the difference is that now all variables can be real numbers. 
+\end{problem}
+
+
+\section{Approximate LP Formulation}
+
+\begin{problem}
+Same thing here. Generalize the approximate version as an LP
+\end{problem}

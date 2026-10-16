@@ -1,0 +1,19 @@
+\section{$k$-Clique vs $(k-1)$-coloring on Random Graphs}
+
+\begin{enumerate}
+    \item Easy for Erdős–Rényi random graph. Check whether it works for any fixed probability p.
+
+    Idea. The average degree of a random graph with $n$ vertices $p*n$. And adding a small $k$-clique does not affect much the average degree. 
+    The average degree of a $(k-1)$-colorable graph is substantially smaller. More specifically, if the graph is $k-1$ colorable, then its vertex set 
+    is partitioned in at most $k-1$ cells, where there are no neighbours within a cell. This means that there is at least one cell that has at least $n/(k-1)$ vertices. This means that 
+    each in vertex in this cell can have at most $n-n/(k-1)$ neighbours. And when k is small enough this affects the average degree $f$ the graphs in such a way that it is detectable by the networks. 
+    (Fill in the details. Most of it already in the writing up. )
+
+    \item Difficult for a specific probability distribution. 
+    
+    Idea: Intuitively we sample graphs that have right average degree. (Check for details)
+        
+ 
+    \item  Both results are confirmed experimentally. See section Experimental results. 
+    
+\end{enumerate}

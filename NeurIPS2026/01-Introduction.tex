@@ -1,0 +1,107 @@
+\section{Introduction}
+Graph neural networks (GNNs) have emerged as a powerful framework for learning on structured data represented as graphs~\citep{Bronstein2021,Battaglia2018}, with successful applications in chemistry and quantum molecular modeling~\citep{GilmerEtAl2017,Kearnes2016}, biological interaction networks~\citep{Jha2022P}, social network analysis~\citep{Kipf2016,HamiltonEtAl2017}, and program analysis and code understanding~\citep{AllamanisEtAl2018,Allamanis2022GNNProgramAnalysis}.
+By iteratively updating node representations based on aggregated information from their local neighborhoods, GNNs provide a principled mechanism for capturing relational structure while remaining invariant to permutations of the graph. 
+%This paradigm has led to strong empirical performance on a wide range of tasks.%, including node classification, link prediction, and graph-level prediction problems.
+
+More recently, there has been growing interest in understanding the extent to which GNNs can be used to tackle mathematical and combinatorial problems, including a range of NP-hard graph problems, often by learning effective heuristics or approximations~\citep{He2025PrimalDualNA,Cappart2021CombinatorialOA,Prates2019}. The empirical success of GNNs on NP-hard graph problems raises a fundamental question about their power as models of combinatorial reasoning and the scope of problems they can effectively address.
+
+The \emph{$k$-clique vs $r$-coloring problem} (we may also refer to it as the \emph{clique-coloring problem}) is a classification problem that asks whether a given input graph contains a clique of size $k$ or whether it admits a proper coloring of at most $r$ colors ($r < k$). The problem is studied as a promise problem, where the input graph is guaranteed to satisfy one of the two conditions. This problem plays a central role in proof complexity under its propositional encoding known as the \emph{clique--coloring principle} (CCP\footnote{Throughout, we use the abbreviation \emph{CPP} for both the clique–coloring problem and the clique–coloring principle. The intended interpretation will be clear from context.}). CCP has been used extensively as a source of hard tautologies, and strong lower bounds are known for several proof systems. In particular, superpolynomial (in fact, near-exponential) lower bounds have been established for \emph{cutting planes} proofs \citep{Pavel1997} and for proof systems based on \emph{ordered binary decision diagrams} (OBDDs) \citep{Nathan2008,Jan2008}, with the lower bounds obtained via feasible interpolation arguments and reductions to monotone circuit lower bounds. These results are surveyed and placed in a broader proof-complexity context by Buss~\citep{BUSS2012906}.
+\footnote{The clique--coloring principle can be viewed as a variant of the pigeonhole principle, since the vertices of a clique must all receive distinct colors. However, many proof systems admit polynomial or subexponential proofs of the pigeonhole principle while still requiring exponential-size proofs for clique--coloring tautologies. This separation makes CCP a particularly robust and informative benchmark for lower bounds in proof complexity.}
+
+At the same time, unlike many canonical hard problems in proof complexity, CPP's underlying promise problem is polynomial-time solvable. This follows from the computation of a graph's Lov\'asz number $\vartheta(G)$ ~\citep{Lovasz1979,GroetschelLovaszSchrijver1981}, and the well known Lov\'asz sandwich inequality\footnote{Graph $\overline{G}$ denotes the complement of graph $G$.}:
+\[
+\omega(G) \;\le\; \vartheta(\overline{G}) \;\le\; \chi(G),
+\]
+where $\omega(G)$ denotes the clique number of $G$ and $\chi(G)$ its chromatic number~\citep{Knuth1994,Goemans1997}. Since $\vartheta(\overline{G})$ can be approximated in polynomial time, it separates graphs containing a $k$-clique from graphs that are $r$-colorable whenever $r<k$.
+
+\subsection{Our Results}
+
+Our first contribution is a family of explicit hard instances for graph neural networks. For every fixed $k \ge 3$, we construct an infinite family of graph pairs, $(G_s^k,H_s^k)\}_{s\in\mathbb{N}}$,
+such that, for every $s \in \mathbb{N}$, the graph $G_s^k$ contains a $k$-clique, the graph $H_s^k$ is $(k\!-\!1)$-colorable, and yet no standard message-passing graph neural network can distinguish between them. In other words, any such network must either accept both graphs or reject both. We further show that this lower bound extends to $2$-GNNs, i.e., higher-order GNNs \citep{MorrisEtAl2019} that perform message passing over pairs of vertices. At the same time, our construction also indicates a sharp increase in power at the next level in that our hard family can already be distinguished by a $3$-GNN. We show analytically that specific 3‑GNN constructions can distinguish our hard graph family in a single message‑passing step, and we show experimentally that 3‑GNNs almost perfectly separate these graph pairs under sufficiently careful experimental conditions.
+
+Our second contribution is experimental. We show that, on random clique-planted and $(k\!-\!1)$-coloring imposed graph instances, distinguishing graphs containing a $k$-clique from graphs that are $(k\!-\!1)$-colorable is easy even for simple GNNs ($1$-GNNs). More precisely, this holds for graphs sampled from a planted $k$-clique model and an analogous planted $(k\!-\!1)$-colorable model with edge probability $1/2$. These results echo recent observations that standard GNNs rely on degree‑based shortcuts in planted settings \citep{Shoham_Haber_Rika_Vilenchik_2026, pmlr-v267-aiyappa25a}, though our framework differs in that we evaluate graph pairs with fundamentally distinct structural properties. Despite this, we observe experimentally that when edge probabilities are adjusted so the two classes have matching expected degrees, the resulting degree‑balanced planted distribution becomes non-trivial for $1$‑GNNs, $2$‑GNNs, and $3$‑GNNs alike. %Finally, our experiments align with the theory on the explicit hard family: they indicate that the family is hard for $1$-GNNs and $2$-GNNs, but easy for $3$-GNNs under sufficiently careful experimental conditions.
+
+
+% This line of work seeks to move beyond purely empirical benchmarks and instead investigate whether neural message-passing architectures can learn algorithmic or structural properties of graphs, such as connectivity, subgraph patterns, or optimization objectives. Notable examples include the use of GNNs for graph isomorphism testing and invariant learning~\cite{XuEtAl2019,MorrisEtAl2019}, for reasoning about logical and combinatorial structure, and for approximating solutions to hard graph problems through learned heuristics.
+
+% Several recent works have reported encouraging results in this direction, demonstrating that GNNs can successfully learn to solve or approximate certain combinatorial tasks on graphs of practical interest. At the same time, these successes have motivated a parallel theoretical effort aimed at clarifying the fundamental capabilities and limitations of GNN architectures, particularly in relation to classical graph algorithms and complexity-theoretic notions of expressivity~\cite{XuEtAl2019,MorrisEtAl2019}.
+
+% \begin{itemize}
+%     \item The clique-colouring principle is ... 
+%     \item This principle has been a fundamental tool in proof complexity theory, and it has been shown to be hard for ... (lots of proof systems. See my paper with Pavel Pudlak) \cite{Oliveira2019} 
+%     \item Despite this the problem is known to be polynomial time solvable via semi definate programming \cite{Goemans1997}.This is achieved through computing the lovasz theta function \cite{Lovasz1979} ... Lovasz sandwich theorem \cite{Knuth1994} ...
+%     % \item It is worth noting that graph neural networks can compute non-monotone functions, such as ... 
+%     % \item Graph neural networks can be generalised to r-dimensions, with increasing expressive power. 
+
+% \end{itemize}
+
+% \subsection{Pinpointing speficic hard families:} 
+
+% \begin{enumerate}
+%     \item We show that for each $k\geq3$ no standard graph neural network can determine whether an arbitrary graph has a k-clique or whether it is k-colorable. More precisely, for each fixed k, we exhibit an 
+% infinite family of pairs of graphs ${(G_s^k,H_s^k)}_{s\in N}$  satisfying the following properties for each $s\in N$. 
+%     \begin{enumerate}
+%         \item $G_s^k$ contains a k-clique and $H_s^k$ is $(k-1)$-colorable
+%         \item No graph neural network can distinguish $G_s^k$ from $H_s^k$. In other words, such a network N either accepts both graphs or rejects both graphs.
+%         \item This result holds also for 2-GNNs (higher dimensional GNN models that perform message passing across pairs of vertices) but we show our hard graph class can be distinguished by 3-GNNs in a single processing round.
+%     \end{enumerate}
+% \end{enumerate}
+
+% \subsection{Random graphs: }
+
+
+% \begin{enumerate}
+
+%     \item Among our experimental contributions we show that distinguishing graphs containing k-cliques form those that are k-1 colorabled is easy even for very simple standard GNNs (1-GNNs) over random graphs (edge probability 1/2) sampled using the planted clique model and analogously sampled random k-1 colorabled graphs.  
+%     \item We also identify a specific distribution over such planted clique and "planted" k-1 colorable graphs that are hard for standard (1-GNNs) under appropriately sophisticated experimental condidtions
+%     \item We additionally confirm empirically that our hard graph class is indistinguishable for 1-GNNs, 2-GNNs but easy for 3-GNNs under appropriately sophisticated experimental condidtions.
+    
+        
+% \end{enumerate}
+
+
+
+
+% \subsection{Some comments}
+
+% \begin{itemize}
+%     \item To be confirmed: The $(k-1)$-coloring problem is NP-complete for each $k\geq3$. Nevertheless, there is a polynomial time algorithm that distinguishes graphs 
+% that have $k$-cliques from graphs that are $(k-1)$-colorable. The algorithm uses the Lovas Theta function. (CHECK THIS! It may be the case that this works for a speficic subclass of graphs)
+
+%     CHECKED: For every fixed $k \ge 3$, deciding whether a graph is $(k-1)$-colorable is NP-complete. However, the \emph{promise problem} of distinguishing graphs that contain a $k$-clique from graphs that are $(k-1)$-colorable can be solved in polynomial time using the Lovász $\vartheta$-function: by the sandwich theorem $\omega(G) \le \vartheta(\overline{G}) \le \chi(G)$, so under the promise we obtain a gap---$\vartheta(\overline{G}) \ge k$ in the first case and $\vartheta(\overline{G}) \le k-1$ in the second---allowing us to separate the two via an efficiently computable approximation of $\vartheta$. This does not contradict NP-completeness because only the gap/promise version becomes tractable.
+
+%     \item Therefore, we show a class of graphs that that can be distinguished easily by polynomial time algorithms but are provably impossible from being distihguished by GNNS even in higher dimensions.
+
+%   \item  Our impossibility results are unconditional and do not require any complexity theoretic assumption. 
+     
+  
+% \end{itemize}
+
+\subsection{Related Work}
+
+A growing body of work has studied the expressive power of message-passing GNNs from a theoretical perspective. In particular, it has been shown that standard neighborhood-aggregation architectures are no more expressive than the $1$-dimensional Weisfeiler--Leman (WL) refinement for distinguishing non-isomorphic graphs~\cite{XuEtAl2019,MorrisEtAl2019}.
+
+The Weisfeiler--Leman method is a fundamental algorithmic paradigm for extracting combinatorial structure from graphs. Originally introduced in the context of graph isomorphism, the $1$-dimensional WL color refinement algorithm iteratively updates vertex labels based on the multiset of neighboring colors. Despite its practical effectiveness, the limitations of $1$-WL are well understood. In particular, it fails to distinguish many non-isomorphic regular graphs, collapsing all vertices into a single color class regardless of global structure~\citep{WeisfeilerLehmanMethod,LowerBoundGraphIdentification}. The seminal work of Cai, Fürer, and Immerman~\citep{LowerBoundGraphIdentification} established optimal lower bounds on the number of variables required for graph identification in first-order logic with counting, showing that for every fixed dimension $r$, there exist non-isomorphic graphs that are indistinguishable by $r$-dimensional WL refinement. This result gave rise to the now-standard hierarchy of $r$-WL procedures, which strictly increases in expressive power with $r$ and has since become a cornerstone of descriptive complexity and graph isomorphism theory.
+
+The correspondence between GNNs and the Weisfeiler--Leman method is in fact exact. Under mild assumptions on the aggregation and update functions, GNNs can simulate $1$-WL but cannot surpass its distinguishing power~\citep{XuEtAl2019,MorrisEtAl2019}. Motivated by this limitation, higher-order GNNs based on the $r$-dimensional WL algorithm have been introduced. These models perform message passing over tuples or subgraphs of vertices and achieve strictly greater expressive power, at the cost of increased computational complexity. As a result, they closely mirror the logical and combinatorial WL hierarchy and inherit its known strengths and limitations.
+
+% \subsection{Related Work}
+% A growing body of work has investigated the expressive power of message-passing GNNs from a theoretical perspective. It has been shown that standard GNN architectures based on neighborhood aggregation are no more expressive than the $1$-dimensional WL refinement in terms of distinguishing non-isomorphic graphs~\cite{XuEtAl2019,MorrisEtAl2019}. The Weisfeiler--Leman (WL) method is a fundamental algorithmic paradigm for extracting combinatorial structure from graphs. Originally introduced in the context of graph isomorphism, the $1$-dimensional WL color refinement algorithm iteratively updates vertex labels based on the multiset of neighboring colors. Despite its practical effectiveness, the limitations of $1$-WL are well documented. In particular, it is known to be incapable of distinguishing many non-isomorphic regular graphs, collapsing all vertices into a single color class regardless of global structure~\cite{Douglas2011,LowerBoundGraphIdentification}. The seminal work of Cai, Fürer, and Immerman~\cite{LowerBoundGraphIdentification} established optimal lower bounds on the number of variables required for graph identification in first-order logic with counting, showing that for every fixed dimension $r$, there exist non-isomorphic graphs indistinguishable by $r$-dimensional WL refinement. This result gave rise to the now-standard hierarchy of $r$-WL procedures, which strictly increases in expressive power with $r$ and has since become a cornerstone of descriptive complexity and graph isomorphism theory.
+
+% The correspondence between GNNs and the weisfielr leman method is exact. Under mild assumptions on aggregation and update functions, GNNs can simulate $1$-WL but cannot exceed its distinguishing power. Motivated by this limitation, higher-order GNNs inspired by the $r$-dimensional WL algorithm have been introduced, allowing message passing over tuples or subgraphs of vertices and yielding strictly increased expressive power at the cost of higher computational complexity~. These models align closely with the logical and combinatorial WL hierarchy and inherit its known strengths and limitations.
+
+% \paragraph{Clique--coloring and semidefinite relaxations.}
+% The problem of relating clique number and chromatic number has a long history in graph theory and combinatorial optimization. A central role is played by the Lovász $\vartheta$-function, introduced as a semidefinite programming relaxation that provides efficiently computable bounds on both invariants. For every graph $\GraphG$, the sandwich inequality
+% \[
+% \omega(\GraphG) \;\le\; \vartheta(\overline{\GraphG}) \;\le\; \chi(\GraphG)
+% \]
+% holds, yielding tight bounds on large classes of graphs. As a consequence, although deciding $(\kay-1)$-colorability is NP-complete for every fixed $\kay \ge 3$, the promise problem of distinguishing graphs that contain a $\kay$-clique from graphs that are $(\kay-1)$-colorable admits a polynomial-time solution via approximation of $\vartheta$. This phenomenon illustrates that the clique--coloring gap has been extensively studied through algebraic and semidefinite techniques, and that its algorithmic complexity is well understood in both exact and promise settings.
+
+% \paragraph{Weisfeiler--Leman refinement.}
+% The Weisfeiler--Leman (WL) method is a fundamental algorithmic paradigm for extracting combinatorial structure from graphs. Originally introduced in the context of graph isomorphism, the $1$-dimensional WL color refinement algorithm iteratively updates vertex labels based on the multiset of neighboring colors. Despite its practical effectiveness, the limitations of $1$-WL are well documented. In particular, it is known to be incapable of distinguishing many non-isomorphic regular graphs, collapsing all vertices into a single color class regardless of global structure~\cite{Douglas2011,LowerBoundGraphIdentification}. The seminal work of Cai, Fürer, and Immerman~\cite{LowerBoundGraphIdentification} established optimal lower bounds on the number of variables required for graph identification in first-order logic with counting, showing that for every fixed dimension $r$, there exist non-isomorphic graphs indistinguishable by $r$-dimensional WL refinement. This result gave rise to the now-standard hierarchy of $r$-WL procedures, which strictly increases in expressive power with $r$ and has since become a cornerstone of descriptive complexity and graph isomorphism theory.
+
+% \paragraph{Graph kernels and WL-based representations.}
+% The WL refinement has also served as the foundation for a broad class of graph kernels used in machine learning. In particular, the Weisfeiler--Leman subtree kernel aggregates vertex colors across refinement rounds to construct explicit feature maps for graphs, yielding strong empirical performance on graph classification benchmarks. Higher-dimensional extensions of WL-based kernels have been proposed to capture richer subgraph structure, closely mirroring the theoretical $r$-WL hierarchy. These kernel methods provided some of the earliest scalable and theoretically grounded approaches for learning on graphs, and they form an important conceptual precursor to modern neural architectures.
+
+% \paragraph{Graph neural networks and expressivity.}
+% Graph neural networks (GNNs) generalize neighborhood aggregation ideas by replacing discrete color refinement with continuous, learnable update rules. A growing body of work has investigated the expressive power of message-passing GNNs from a theoretical perspective. It has been shown that standard GNN architectures based on neighborhood aggregation are no more expressive than the $1$-dimensional WL refinement in terms of distinguishing non-isomorphic graphs~\cite{XuEtAl2019,MorrisEtAl2019}. Moreover, this correspondence is exact: under mild assumptions on aggregation and update functions, GNNs can simulate $1$-WL but cannot exceed its distinguishing power~\cite{XuEtAl2019,MorrisEtAl2019}. Motivated by this limitation, higher-order GNNs inspired by the $r$-dimensional WL algorithm have been introduced, allowing message passing over tuples or subgraphs of vertices and yielding strictly increased expressive power at the cost of higher computational complexity~\cite{MorrisEtAl2019}. These models align closely with the logical and combinatorial WL hierarchy and inherit its known strengths and limitations.

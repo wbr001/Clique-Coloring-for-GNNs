@@ -1,0 +1,45 @@
+\section{Preliminaries}
+
+
+\begin{definition}[Dataset]
+A $(n,k)$-dataset is a sequence $D = (D_0,D_1,...,D_{k-1})$ 
+where each $D_i\subseteq \{0,1\}^n$ such that 
+$D_i\cap D_j = \emptyset$ for each $i\neq j$.  
+\end{definition}
+
+
+\begin{problem}\label{Problem:MainProblem}
+Given a Dataset $D$, learn a Network that is consistent with $D$. A relaxation of this problem consists in learning a network that is inconsistent with at most an $\varepsilon$ fraction of  the inputs. 
+\end{problem}
+
+
+\section{Networks with Threshold Gates and Integer Weights}
+
+We will be operating with \textit{Threshold Gate Networks}. In this type of network, neurons are threshold gates. A gate with threshold $t$ fires if the sum of its inputs is at least $t$. In this first version, gates are assumed to be integers.  
+
+
+\begin{problem}[Consistent Network]
+\label{problem:Consistent}
+Given an $(n,2)$-dataset $D = (D_0,D_1)$ and numbers 
+$\delta$ (depth), $\omega$ (width), and $\tau$ (threshold), determine 
+whether there exists a Threshold Gate Network $N$ 
+such that $N$ rejects all strings in $D_0$ and accepts all 
+strings in $D_1$. 
+\end{problem}
+
+
+\begin{problem}[Approximately Consistent Network]
+\label{problem:Approximate}
+
+Given an $(n,2)$-dataset $D = (D_0,D_1)$ and numbers 
+$\delta$ (depth), $\omega$ (width), $\tau$ (threshold), and $\epsilon$, determine 
+whether there exists a Threshold Gate Network $N$ 
+such that $N$ rejects at least $(1-\epsilon)$ strings in $D_0$ and accepts at least $(1-\epsilon)$ strings in $D_1$. 
+\end{problem}
+
+
+\subsection{Evaluation of a network on a dataset}
+
+\begin{itemize}
+    \item Implement a program that reads a network (threshold circuit) from a file, and a dataset from another file and evaluates the circuit on each datapoint. 
+\end{itemize}

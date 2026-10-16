@@ -1,0 +1,263 @@
+\section{Experimental Setup and Results}\label{app:Experiments}
+
+% This appendix summarizes the architectures, hyperparameters, datasets, and empirical findings for the experiments described in Section \ref{sec:Experiments} as well as a third experiment wheer we test GNN models of our hard graph class. All experiments use PyTorch Geometric implementations of 1-GNN (GCN), 2-GNN (TwoMalkin), and 3-GNN (ConnectedThreeMalkin) adapted from \cite{MorrisEtAl2019}. Models are trained with AdamW, BCEWithLogitsLoss, early stopping (patience~10), and degree-based node features. Unless stated otherwise, each dataset contains $500$ graphs per class.
+This appendix summarizes the architectures, hyperparameters, datasets, and empirical findings for the experiments described in Section~\ref{sec:Experiments}, as well as a third experiment in which we evaluate GNN models on our hard graph family. All experiments use PyTorch Geometric implementations of 1-GNN (GCN), 2-GNN (\textsc{TwoMalkin}), and 3-GNN (\textsc{ConnectedThreeMalkin}) adapted from \citet{MorrisEtAl2019}. Models are trained using AdamW, \texttt{BCEWithLogitsLoss}, early stopping (patience~10), and degree-based node features. Unless stated otherwise, each dataset contains $500$ graphs per class.
+
+
+\subsection{Model Architectures}
+
+\paragraph{1-GNN (GCN).}
+Our 1-GNN models are standard GCN architectures consisting of a stack of \texttt{GCNConv} layers with ReLU activations, followed by global mean pooling and a linear classification head. When \texttt{hidden\_channels} is given as a flat list (e.g.\ \texttt{[128, 64, 32]}), the entries specify the widths of successive GCN layers. When it is a list of two lists (e.g.\ \texttt{[[32, 32, 32], [8, 2]]}), the first list defines the GCN layers and the second specifies additional linear layers applied after pooling. The optional flag \texttt{use\_topk} enables TopKPooling (ratio = 0.5) after each GCN layer. The parameter grid used in Experiments~1 and~2 is summarized in Table~\ref{parameterTable}.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{ll}
+\toprule
+\textbf{Parameter} & \textbf{Values} \\
+\midrule
+\texttt{hidden\_channels} 
+& \texttt{[128, 64, 32]}, \texttt{[32, 64, 128]}, \texttt{[8, 8, 8]}, \texttt{[4]}, \texttt{[1]}, \\
+& \texttt{[[32, 32, 32], [8, 2]]}, \texttt{[[4], [4]]} \\
+\texttt{lr} & 0.001 \\
+\texttt{batch\_size} & 4 \\
+\texttt{use\_topk} & \texttt{True}, \texttt{False} \\
+\texttt{s} (clique size) & 3, 4, 5, 6, 7 \\
+\bottomrule
+\end{tabular}
+\caption{Parameter grid for the 1-GNN models (Experiments~1 and~2).}
+\label{parameterTable}
+\end{table}
+
+Across this grid, we obtain $7$ architectures $\times$ $2$ pooling options $\times$ $5$ clique sizes, yielding \textbf{70 runs} per experiment. Each run trains a separate model for every graph size $N \in \{100, 200, \ldots, 800\}$, resulting in eight independently trained models per configuration. For Experiment~3 (IP), we use the same architectural grid and pooling options but set \texttt{batch\_size} = 1, giving $7 \times 2 = \textbf{14 runs}$.
+
+
+% \paragraph{1-GNN (GCN).}
+% The 1-GNN we employ is a standard GCN (`GCNConv` layers → ReLU → global mean pool → linear head). When `hidden_channels` is a flat list like `[128, 64, 32]`, those are the widths of the GCN layers. When it's a list of two lists like `[[32, 32, 32], [8, 2]]`, the first list defines GCN layer widths and the second defines additional linear layers after pooling. The `use_topk` flag adds TopKPooling (ratio=0.5) after each GCN layer.
+% We summarize the different parameter values (fro experiments 1 and 2) used in table \ref{parameterTable}below:
+
+% \begin{table}[h] \label{parameterTable}
+% \centering
+% \begin{tabular}{ll}
+% \toprule
+% \textbf{Parameter} & \textbf{Values} \\
+% \midrule
+% \texttt{hidden\_channels} 
+% & \texttt{[128, 64, 32]}, \texttt{[32, 64, 128]}, \texttt{[8, 8, 8]}, \texttt{[4]}, \texttt{[1]}, \\
+% & \texttt{[[32, 32, 32], [8, 2]]}, \texttt{[[4], [4]]} \\
+% \texttt{lr} & 0.001 \\
+% \texttt{batch\_size} & 4 \\
+% \texttt{use\_topk} & \texttt{True}, \texttt{False} \\
+% \texttt{s} (clique size) & 3, 4, 5, 6, 7 \\
+% \bottomrule
+% \end{tabular}
+% \caption{Parameter grid (same for Experiments 1 and 2).}
+% \end{table}
+
+% That's 7 architectures × 2 pooling options × 5 clique sizes = **70 runs** per experiment. Each run trains a fresh model from scratch for each N ∈ {100, 200, …, 800} (so 8 independent models per run, one per graph size). The Exp. 3 (IP) grid uses the same architectures and pooling options with `batch_size=1`, giving 7 × 2 = **14 runs**.
+% Grid:
+
+
+% \[
+% \texttt{hidden\_channels} \in 
+% \big\{[128,64,32], [32,64,128], [8,8,8], [4], [1], [[32,32,32],[8,2]], [[4],[4]]\big\},
+% \]
+
+
+
+
+% \[
+% \texttt{use\_topk} \in \{\text{True},\text{False}\},\qquad
+% \texttt{lr}=10^{-3},\qquad
+% \texttt{batch\_size}=4.
+% \]
+
+
+
+\paragraph{2-GNN (TWOGNNClassifier).}
+Our 2-GNN models follow the two-level architecture introduced by \citet{MorrisEtAl2019}. A first stack of \texttt{GraphConv} layers is applied to the base graph, after which node representations are lifted to the 2-local graph using the \textsc{TwoMalkin} construction and augmented with the \texttt{iso\_type\_2} isomorphism feature. A second \texttt{GraphConv} stack is then applied on the 2-local graph, and the global mean-pooled embeddings from both levels are concatenated and passed to an MLP classifier. The \texttt{hidden\_channels} parameter is a three-part tuple $(\texttt{conv}, \texttt{post}, \texttt{mlp})$ specifying the GCN layers on the base graph, the GCN layers on the 2-local graph, and the MLP head, respectively. The parameter grid used across Experiments~1–3 is summarized in Table~\ref{table:2gnn-grid}.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{ll}
+\toprule
+\textbf{Parameter} & \textbf{Values} \\
+\midrule
+\texttt{hidden\_channels} 
+& \texttt{([1, 64, 64], [64, 64], [64, 32])}, \\
+& \texttt{([1, 4], [4, 32], [32, 4])}, \\
+& \texttt{([1, 4, 8], [8, 32], [32, 16])} \\
+\texttt{lr} & $10^{-5}$, $10^{-4}$, $10^{-3}$ \\
+\texttt{batch\_size} & 4, 16 \\
+\texttt{s} (clique size) & 3, 4, 5, 6, 7 (Exp.~1 and~2 only) \\
+\bottomrule
+\end{tabular}
+\caption{Parameter grid for the 2-GNN models (Experiments~1–3).}
+\label{table:2gnn-grid}
+\end{table}
+
+Across this grid, we obtain $3$ architectures $\times$ $3$ learning rates $\times$ $2$ batch sizes $\times$ $5$ clique sizes, yielding \textbf{90 runs} for Experiments~1–2, and $3 \times 3 \times 2 = \textbf{18 runs}$ for Experiment~3. Due to memory constraints of the 2-local expansion, all 2-GNN models are evaluated only at $N = 100$.
+
+
+\paragraph{3-GNN (ThreeGNNClassifier).}
+The 3-GNN architecture follows the same overall structure as the 2-GNN, but lifts node representations to the 3-local graph using the \textsc{ConnectedThreeMalkin} construction and augments them with the \texttt{iso\_type\_3} isomorphism feature. The \texttt{hidden\_channels} parameter again consists of a three-part tuple $(\texttt{conv}, \texttt{post}, \texttt{mlp})$, specifying the GCN layers on the base graph, the GCN layers on the 3-local graph, and the MLP classifier head. The parameter grid used in Experiments~2 and~3 is summarized in Table~\ref{table:3gnn-grid}.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{ll}
+\toprule
+\textbf{Parameter} & \textbf{Values} \\
+\midrule
+\texttt{hidden\_channels} 
+& \texttt{([1, 64, 64], [64, 64], [64, 32])}, \\
+& \texttt{([1, 4], [4, 32], [32, 4])}, \\
+& \texttt{([1, 4, 8], [8, 32], [32, 16])} \\
+\texttt{lr} & $10^{-5}$, $10^{-4}$, $10^{-3}$ \\
+\texttt{batch\_size} & 4 \\
+\texttt{s} (clique size) & 3, 4, 5 (Exp.~2 only) \\
+\bottomrule
+\end{tabular}
+\caption{Parameter grid for the 3-GNN models (Experiments~2--3).}
+\label{table:3gnn-grid}
+\end{table}
+
+This grid yields $3$ architectures $\times$ $3$ learning rates $\times$ $1$ batch size $\times$ $3$ clique sizes, giving \textbf{27 runs} for Experiment~2, and $3 \times 3 \times 1 = \textbf{9 runs}$ for Experiment~3. All 3-GNN models are evaluated at $N = 100$, as the 3-local expansion becomes prohibitively memory-intensive for larger graphs. In Experiment~2, clique sizes $s = 6$ and $s = 7$ lead to out-of-memory failures (approximately 13\,GB) at $N = 100$. A small number of $s = 6$ runs completed successfully, but $s = 7$ could not be evaluated.
+
+\subsection{Experiment 1: Planted Random Graphs.}
+
+We evaluate graph sizes $N \in \{100, 200, 300, 400, 500, 600, 700, 800\}$ for the 1-GNN models, and $N = 100$ for the 2-GNN models (due to memory constraints of the 2-local expansion). The results, summarized in Table~\ref{tab:exp1_results}, show that both 1-GNN and 2-GNN achieve \emph{perfect} accuracy across all clique sizes and all tested graph sizes. This suggests that the task is trivial for message-passing GNNs when degree information is not controlled for. The 2-GNN results further verify that the higher-order architecture behaves as expected, matching the performance of the 1-GNN on this degree-imbalanced distribution.
+
+
+% \subsection{Experiment 1: Planted Random Graphs}
+
+% We classify Erdős--Rényi graphs containing a planted $k$-clique (class~1) versus $(k-1)$-colorable graphs (class~0), both sampled with edge probability $p=0.5$.  
+% Graph sizes are $N\in\{100,\dots,800\}$ and $k\in\{3,\dots,7\}$.
+
+% \paragraph{Result.}
+% Both 1-GNN and 2-GNN achieve \textbf{100\% accuracy for all $k$ and all $N$}.  
+% The planted clique introduces a degree-distribution shift, making the task trivial for message-passing GNNs.
+
+% \subsection{Experiment 2: Matching Average Degree}
+
+% To remove the degree shortcut, we adjust the non-clique edge probability in the planted class so that its expected average degree matches the $(k-1)$-colorable class.  
+% We test 1-GNN on $N\in\{100,\dots,800\}$ and 2/3-GNN on $N=100$.
+
+% \paragraph{1-GNN results.}
+% Accuracy varies widely and generally decreases with both $N$ and $k$.  
+% For small $k$ and moderate $N$, accuracies occasionally spike (e.g.\ $k=3$ at $N=200$ reaches $99\%$), but for $k\ge 6$ and large $N$ performance collapses to $\approx 50\%$.  
+% This indicates that the task is learnable in principle but difficult to optimize reliably.
+
+% \paragraph{WL hierarchy comparison (at $N=100$).}
+
+
+% \[
+% \begin{array}{c|ccc}
+% k & \text{1-GNN (1-WL)} & \text{2-GNN (2-WL)} & \text{3-GNN (3-WL)}\\\hline
+% 3 & 68\% & 95\% & 93\%\\
+% 4 & \mathbf{85\%} & 64\% & 57\%\\
+% 5 & \mathbf{75\%} & 66\% & 59\%\\
+% 6 & \mathbf{62\%} & 56\% & 53\%\\
+% 7 & \mathbf{63\%} & 55\% & \text{OOM}
+% \end{array}
+% \]
+
+
+% Higher-order GNNs do not consistently improve performance once degree information is removed.  
+% The difficulty appears statistical rather than expressiveness-limited: detecting small planted cliques in random graphs is intrinsically hard, and the optimization landscape becomes more challenging for higher-order models.
+
+\subsection{Experiment 2: Matching Average Degree.}
+% In this experiment we repeat the planted $k$-clique vs.\ $(k\!-\!1)$-colorable classification task, but remove the degree-distribution shortcut exploited in Experiment~1. For each $k$, we adjust the Erdős--Rényi edge probability in the planted $k$-clique class so that its expected average degree matches that of the $(k\!-\!1)$-colorable class (Equations~1--2 in the main text). This produces a substantially more challenging distribution in which the planted clique signal is no longer detectable from simple degree statistics.
+
+We evaluate 1-GNN models on graph sizes $N \in \{100,200,\ldots,800\}$, and evaluate 2-GNN and 3-GNN models only at $N = 100$ due to the memory cost of the $k$-local graph expansions. The 1-GNN results across graph sizes are shown in Table~\ref{tab:exp2_1gnn_results}.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lcccccccc}
+\toprule
+\textbf{$k$} & \textbf{100} & \textbf{200} & \textbf{300} & \textbf{400} & \textbf{500} & \textbf{600} & \textbf{700} & \textbf{800} \\
+\midrule
+3 & 68\% & 99\% & 68\% & 72\% & 62\% & 59\% & 53\% & 53\% \\
+4 & 85\% & 91\% & 78\% & 52\% & 59\% & 51\% & 99\% & 85\% \\
+5 & 75\% & 88\% & 86\% & 55\% & 50\% & 55\% & 50\% & 59\% \\
+6 & 62\% & 53\% & 52\% & 52\% & 50\% & 52\% & 50\% & 50\% \\
+7 & 63\% & 57\% & 55\% & 54\% & 50\% & 50\% & 50\% & 50\% \\
+\bottomrule
+\end{tabular}
+\caption{1-GNN accuracy across graph sizes $N$ for the degree-matched planted clique task (Experiment~2).}
+\label{tab:exp2_1gnn_results}
+\end{table}
+
+% Although some runs exhibit variability (e.g., the spike to 99\% for $k=4$ at $N=700$), these fluctuations are likely due to single-seed randomness in training and data generation. The overall trend is clear: accuracy decreases as both $k$ and $N$ increase. Nevertheless, the results show that it is \emph{possible} for a 1-GNN to learn this task at moderate graph sizes, even though optimization seems to become increasingly difficult.
+
+To compare architectures at fixed graph size, we evaluate 1-GNN, 2-GNN, and 3-GNN models at $N = 100$. The results, reported in Table~\ref{tab:wl_comparison_n100} in the main text, show that higher-order GNNs do not automatically improve performance once the degree shortcut is removed. For $k \ge 4$, both 2-GNN and 3-GNN slightly underperform the 1-GNN, while for $k = 3$ the 2-GNN achieves a modest improvement (95\% vs.\ 68\%). The 3-GNN could not be evaluated for $k = 7$ due to out-of-memory errors caused by the 3-local graph expansion at $N = 100$.
+
+% Overall, these findings suggest that the difficulty of the degree-matched planted clique task is not primarily due to WL expressiveness limitations. Instead, the challenge appears to be statistical: detecting a small planted clique in a random graph is intrinsically hard, and increasing
+
+\subsection{Experiment 3: Hard Graph Family.}\label{app:Experiment3}
+In this final experiment we evaluate GNN performance on the hard graph family introduced in Definition~3.1, instantiated with $k = 3$. For each $s \in \{1,\ldots,100\}$ we construct a pair of non-isomorphic graphs $(G^3_s, H^3_s)$, where
+
+
+\[
+G^3_s \;=\; (K_3 \,\square\, C_2) \,\square\, C_{2s}
+\]
+
+
+contains a planted 3-clique, while $H^3_s$ is a rewired variant that is 2-colorable. By construction, the two graphs have the same number of vertices ($|V| = 12s$), identical degree sequences, and are provably indistinguishable by both 1-WL (Theorem~3.2) and 2-WL (Theorem~3.3). Thus, any architecture whose expressive power is bounded by 1-WL or 2-WL should perform no better than random guessing.
+
+We generate 100 graph pairs for training and 100 for validation. The empirical results are shown below.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lccc}
+\toprule
+\textbf{Model} & \textbf{WL Power} & \textbf{Best Val.\ Accuracy} & \textbf{Theory Prediction} \\
+\midrule
+\textbf{1-GNN} & 1-WL & \textbf{52\%} (random) & Cannot distinguish (Thm.\ref{thm:Ind1GNN}) \\
+\textbf{2-GNN} & 2-WL & \textbf{54\%} (random) & Cannot distinguish (Thm.\ref{thm:Ind2-GNN}) \\
+\textbf{3-GNN} & 3-WL & \textbf{98\%} & No hardness theorem for 3-WL \\
+\bottomrule
+\end{tabular}
+\caption{Validation accuracy of 1-GNN, 2-GNN, and 3-GNN on the hard graph family (Experiment~3).}
+\label{tab:exp3_results}
+\end{table}
+
+
+
+The 3-GNN, for which there is no hardness result, achieves 98\% accuracy. This demonstrates that the 3-local lifting used by the 3-GNN is sufficiently expressive to separate the two graph families.
+
+
+% \subsection{Experiment 3: Hard Graph Family}
+
+% We evaluate the indistinguishable graph pairs $(G^3_s,H^3_s)$ from Definition~3.1, where
+
+
+% \[
+% G^3_s = (K_3 \,\square\, C_2)\,\square\, C_{2s},\qquad
+% H^3_s \text{ is a rewired, 2-colorable variant}.
+% \]
+
+
+% Both graphs have $|V|=12s$, identical degree sequences, and are provably indistinguishable by 1-WL and 2-WL (Theorems~3.2--3.3).  
+% We use $100$ training and $100$ validation pairs for $s\in\{1,\dots,100\}$.
+
+% \paragraph{Results.}
+
+
+% \[
+% \begin{array}{c|c|c|c}
+% \text{Model} & \text{WL Power} & \text{Best Accuracy} & \text{Theory Prediction}\\\hline
+% \text{1-GNN} & 1\text{-WL} & 52\% & \text{Indistinguishable}\\
+% \text{2-GNN} & 2\text{-WL} & 54\% & \text{Indistinguishable}\\
+% \text{3-GNN} & 3\text{-WL} & \mathbf{98\%} & \text{No hardness result}
+% \end{array}
+% \]
+
+
+
+% 1-GNN and 2-GNN perform at chance level across all hyperparameters, matching the theoretical impossibility of distinguishing $(G^3_s,H^3_s)$.  
+% A 3-GNN, however, achieves up to \textbf{98\%} accuracy for a specific architecture and learning rate, demonstrating that 3-WL can separate this family and giving a clean empirical separation between 2-WL and 3-WL.
+
+% \medskip
+% \noindent\textbf{Summary.}  
+% Experiment~1 confirms that degree shortcuts make planted-clique detection trivial for GNNs.  
+% Experiment~2 shows that removing degree information makes the task substantially harder, with performance degrading toward chance.  
+% Experiment~3 provides strong empirical evidence for the WL hierarchy: 1-WL and 2-WL fail exactly where predicted, while 3-WL succeeds.

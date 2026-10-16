@@ -1,0 +1,44 @@
+
+
+\section{TODO}
+
+\begin{enumerate}
+  %  \item Design a test framework to evaluate whether the algorithm is learning circuits with a given depth, $max\_{width}$ and number of inputs. 
+   % \begin{itemize}
+       % \item Generate circuits at random, then generate data points at random (try to get half/half if possible)
+   %     \item Use the dataset to try to learn a new circuit, and check whether the result is consistent on the dataset points. 
+ %   \end{itemize}
+  %  \item Determine the complexity of the linear programming formulation (how many constraints, etc.)
+  %  \item Write a theoretical definition of the LP in latex. 
+  %  \item Relaxed formulation (specify an epsilon )
+    \item Measure the time that you need to get a given accuracy: Run the algorithm and whenever you reach 50\%, 60\%, 70\%, 80\%, 90\%, 100\%...you take a snapshot of the time that it took that accuracy. 
+\end{enumerate}
+
+
+\section{NExt Steps - (07/March)}
+
+\begin{enumerate}
+    \item Adapt the model to allow inputs on each layer. 
+    \begin{itemize}
+        \item Allow a single input per layer.
+        \item Allow a single input per gate.
+        \item One possibility (every input layer is an input to every gate, but you can choose the weight of the edge (0 or 1)) 
+        \item Branching programs: you have two layers pert depth, corresponding to a single input. If the input is 0, apply one layer. If the input is 1 apply the other alayer. 
+    \end{itemize}
+    \item Push the monotone circuits generation to the limit. Make experiments that vary the size of the input with the number of dataset points. 
+    The number of dataset points can be large. 
+    \item Test with arithmetic functions (addition, subtraction.)
+\end{enumerate}
+
+\section{Next Steps}
+
+
+\begin{enumerate}
+ \item Viljar: 
+\begin{enumerate}
+    \item Apply the concept of batch size optimization the the simulated annealing algorithm. Essentially this can be used with respect to any optimization method. 
+    \item Apply local optimization technique to the layers of the model. Fix one layer, precompute the values of all layers before and all layers after and only do the optimization in the fixed layer. 
+    \item Decrease the width of the network in function of the depth 1024, 512, 256,...,1
+    \item Once all three steps are done and working for random datasets, try it on some niche-application. Such as recognizing distributions, etc. 
+\end{enumerate}
+\end{enumerate}

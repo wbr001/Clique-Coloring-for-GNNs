@@ -1,0 +1,284 @@
+\section{Experiment 1: Effect of Training Data Size on Performance}
+
+\subsection{Hypothesis}
+
+Increasing the number of training data points will enhance the neural network's ability to predict whether a graph was generated to be $r$-colorable or to contain a $s$-clique. We expect performance improvements up to a certain threshold, beyond which additional data will result in diminishing returns. For simple problems, we expect to achieve close to 100\% training accuracy given sufficient samples. On harder problems, we expect many training samples to be necessary before the networks start learning. The accuracy is then expected to increase with bigger datasets, with diminishing results for very large datasets. Datasets are assumed to be more difficult when $r$ and $s$ are close. Bigger graphs are also expected to be more difficult.
+
+\subsection{Methodology}
+
+\begin{enumerate}
+    \item \textbf{Fix Graph Parameters:}
+    \begin{itemize}
+        \item \textbf{Number of vertices ($N$):} Set to a constant value, $N = 64$ and $N=256$.
+        \item \textbf{Graph Types:} Choose specific values for $r$ and $s$.
+        \begin{itemize}
+            \item \textit{Simpler Case:} $r = 2$, $s = 6$. \textcolor{red}{Choose ranges $r\in [2,...,5]$ and $s\in [r+1,2r]$, notet that there are only two possibilities for $s$}
+            \item \textit{More Difficult Case:} $r = 5$, $s = 6$. 
+        \end{itemize}
+    \end{itemize}
+    \item \textbf{Generate Datasets:}
+    \begin{itemize}
+        \item \textbf{Training Data Sizes ($D$):} Vary the number of training samples:
+        \[
+        D \in \{256, 512, 1024, 2048, 4096, 8192,16384\}
+        \]
+        \item \textbf{Data Generation:}
+        \begin{itemize}
+            \item For each $D$, generate $\frac{D}{2}$ graphs to be $r$-colorable.
+            \item Generate $\frac{D}{2}$ graphs to contain a $s$-clique.
+        \end{itemize}
+    \end{itemize}
+    \item \textbf{Neural Network Architecture:}
+    \begin{itemize}
+        \item \textbf{Model:} Use a fixed Graph Convolutional Network (GCN) with 3 layers and 32 filters per layer.
+        \item \textbf{Hyperparameters:} Keep learning rate, batch size, and other training hyperparameters constant throughout the experiments.
+    \end{itemize}
+    \item \textbf{Training and Evaluation:}
+    \begin{itemize}
+        \item \textbf{Training:} Train the neural network with three different seeds separately on each dataset size $D$.
+        \item \textbf{Evaluation:}
+        \begin{itemize}
+            \item Use a fixed validation set with 1000 samples.
+            \item Measure performance metrics: accuracy, precision, recall, F1-score, both mean and max.
+        \end{itemize}
+    \end{itemize}
+\end{enumerate}
+
+\subsection{Expected Results}
+
+\begin{itemize}
+    \item \textbf{Performance vs. Training Data Size:}
+    \begin{itemize}
+        \item For the \textit{simpler case}, we expect high accuracy even with smaller $D$.
+        \item For the \textit{more difficult case}, we anticipate that performance improves with increasing $D$, potentially plateauing as $D$ becomes large.
+    \end{itemize}
+    \item \textbf{Graphs:}
+    \begin{itemize}
+        \item Plot accuracy against training data size for both cases.
+        \item Illustrate diminishing returns by showing the curve flattening at higher $D$ values.
+        \item Plot confusion matrix when accuracy decreases to investigate which cases contribute to decreasing accuracy, i.e. false positive vs false negative.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Results Visualization}
+
+A line plot will be created with training data size on the x-axis and accuracy on the y-axis, displaying curves for both the simpler and more difficult cases.
+
+
+\section{Experiment 2: Impact of Neural Network Complexity on Performance}
+
+\subsection{Hypothesis}
+
+Increasing the number of filters and layers in the neural network will improve performance in predicting graph properties up to a point. Beyond this, additional complexity may lead to overfitting, resulting in decreased performance on unseen data. Furthermore, the more difficult scenario (see Experiment 1) will require deeper networks. Depth of network will be more important than number of filters, with deeper networks expected to be better but harder to fit. 16 layers is expected to be too deep to fit.
+
+\subsection{Methodology}
+
+\begin{enumerate}
+    \item Suggestion for both experiments at the same time. Fix four values for each parameter: number of colors, size of the graph, size of the dataset, number of layers, filters per layer. 
+    \item Execute one experiment for each combination. 
+    \item build a big excel table 
+    \item To present the results. Fix 4 of the parameters leaving only one variable as the independent variable 
+\end{enumerate}
+
+
+\begin{enumerate}
+    \item Graph sizes: $64,128,256,512$
+    \item Color numbers: $r= 2,3,4,5$ clique numbers $r+1$ and $2r$. 
+    \item \textbf{Fix Data Parameters:}
+    \begin{itemize}
+        \item \textbf{Training Data Size:} Use a constant number of training samples, $D = 8192$ (depending on the results from experiment 1).
+        \item \textbf{Graph Parameters:}
+        \begin{itemize}
+            \item Same as in Experiment 1
+        \end{itemize}
+    \end{itemize}
+    \item \textbf{Modify Neural Network Architecture:}
+    \begin{itemize}
+        \item \textbf{Layers ($L$):}
+        \[
+        L \in \{1, 2, 4, 8, 16\}
+        \]
+        \item \textbf{Filters per Layer ($F$):}
+        \[
+        F \in \{16, 32, 64, 128\}
+        \]
+        \item \textbf{Total Configurations:} Test all combinations of $L$ and $F$.
+    \end{itemize}
+    \item \textbf{Training and Evaluation:}
+    \begin{itemize}
+        \item \textbf{Training:} Train the neural network with three different seeds for each configuration.
+        \item \textbf{Evaluation:}
+        \begin{itemize}
+            \item Use the same validation set as in Experiment 1.
+            \item Measure performance metrics: accuracy, precision, recall, F1-score.
+        \end{itemize}
+    \end{itemize}
+\end{enumerate}
+
+\subsection{Expected Results}
+
+\begin{itemize}
+    \item \textbf{Performance vs. Model Complexity:}
+    \begin{itemize}
+        \item Expect performance to improve with increased $L$ and $F$ up to an optimal point.
+        \item Anticipate overfitting in models with excessive complexity, leading to reduced test accuracy.
+    \end{itemize}
+    \item \textbf{Graphs:}
+    \begin{itemize}
+        \item Create a table and heatmap showing maximum accuracy across different $L$ and $F$ values.
+        \item Create a table and heatmap showing difference between training and validation accuracy across different $L$ and $F$ values, highlighting any overfitting trends.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Results Visualization}
+
+A heatmap will be created where the x-axis represents the number of layers ($L$), the y-axis represents the number of filters ($F$), and the color intensity represents accuracy.
+
+
+\section{General Notes}
+
+\begin{itemize}
+    \item \textbf{Simpler vs. More Difficult Cases:} Perform both experiments for the simpler and more difficult cases to observe how problem complexity affects data requirements and model capacity needs.
+    \item \textbf{Statistical Significance:} If interesting results arise, repeat experiments with more seeds and use statistical tests (e.g., t-tests) to confirm whether differences in performance are significant.
+    \item \textbf{Reproducibility:} Ensure that all random processes (e.g., graph generation, weight initialization) are controlled via random seeds.
+\end{itemize}
+
+
+\section{Experiment 3: Investigating the Valley Phenomenon}
+
+\subsection{Observation}
+
+When the neural network is trained on a dataset with graphs with certain numbers of vertices (e.g., $N_a = 64$ and $N_b = 128$), it performs well on these sizes but shows rapidly decreasing accuracy on intermediate sizes (e.g., $N = 70$). Notably, the accuracy at $N = \frac{1}{2} (N_a + N_b) $ can be close to $0\%$, indicating that flipping the predictions could yield close to $100\%$ accuracy. 
+
+
+
+\subsection{Hypotheses}
+
+\begin{enumerate}
+    \item \textbf{Influence of Vertex Count Range:} The distance between the maximum and minimum number of vertices used during training influences the depth of the performance valley. A smaller difference between $N_a$ and $N_b$ (narrow valley) will make the valley less distinct. Too big of a difference between $N_a$ and $N_b$ (wide valley) might make training harder, and make the valley disappear. The valley is expected to have the same general shape, but scaled to the width of the valley meaning that narrower valleys will have a faster performance drop-off than wider valleys. 
+
+    \item \textbf{Effect of Training on Multiple Spaced Sizes:} Training the neural network on graphs with multiple, evenly spaced sizes will reduce the performance drop at intermediate sizes. We expect a smoother performance curve across different graph sizes. For sufficient distance and few different sizes we still expect valleys, but with more than 3-4 different sizes, we expect the valley phenomenon to disappear. For cases where the valley is gone, we expect the network to generalize further away from the number of nodes it is trained on. 
+
+    \item \textbf{Predictability of the Valley Pattern:} The pattern of the performance valley can be predicted based on the training sizes and the properties of the graphs. Understanding this pattern may allow adjustments to the training process to mitigate the valley effect, or to utilize the valley effect to generalize beyond what the network was trained on.
+\end{enumerate}
+
+\subsection{Methodology}
+
+\subsubsection{Experiment 3.1: Influence of Vertex Count Range}
+
+\begin{enumerate}
+    \item \textbf{Training Graph Sizes:}
+    \begin{itemize}
+        \item \textit{Small Range:} $N_{\text{train}} = \{32, 64\}$
+        \item \textit{Large Range:} $N_{\text{train}} = \{32, 128\}$
+    \end{itemize}
+
+    \item \textbf{Graph Parameters:}
+    \begin{itemize}
+        \item Number of colors/clique size: Use fixed values, e.g., $r = 3$, $s = 4$.
+    \end{itemize}
+
+    \item \textbf{Generate Datasets:}
+    \begin{itemize}
+        \item For each training size in $N_{\text{train}}$, generate a balanced dataset of $r$-colorable graphs and graphs containing an $s$-clique.
+        \item Use a constant training data size, e.g., $D = 4096$ (dependent on experiment 1) for each $N_{\text{train}}$.
+    \end{itemize}
+
+    \item \textbf{Neural Network Architecture:}
+    \begin{itemize}
+        \item Use a fixed neural network architecture as in previous experiments.
+    \end{itemize}
+
+    \item \textbf{Evaluation:}
+    \begin{itemize}
+        \item Test the neural networks on graphs with vertex counts ranging from the minimum to the maximum training sizes.
+        \item Measure accuracy at each graph size.
+    \end{itemize}
+    
+\end{enumerate}
+
+\subsubsection{Experiment 3.2: Effect of Training on Multiple Spaced Sizes}
+
+\begin{enumerate}
+    \item \textbf{Training Graph Sizes:}
+    \begin{itemize}
+        \item Train on $k$ evenly spaced vertex counts within a range.
+        \item Examples:
+        \begin{itemize}
+            \item $k = 3$: $N_{\text{train}} = \{64, 96, 128 \}$
+            \item $k = 6$: $N_{\text{train}} = \{64, 80, 96, 112, 128\}$
+        \end{itemize}
+    \end{itemize}
+
+    \item \textbf{Graph Parameters:}
+    \begin{itemize}
+        \item Use the same $r$ and $s$ values as in Experiment 3.1.
+    \end{itemize}
+
+    \item \textbf{Generate Datasets:}
+    \begin{itemize}
+        \item For each training size, generate a balanced dataset of $r$-colorable graphs and graphs containing an $s$-clique.
+        \item Use the same total training data size, distributing it equally among the different $N_{\text{train}}$.
+    \end{itemize}
+
+    \item \textbf{Neural Network Architecture:}
+    \begin{itemize}
+        \item Use the same architecture as in previous experiments.
+    \end{itemize}
+
+    \item \textbf{Evaluation:}
+    \begin{itemize}
+        \item Test on all intermediate sizes between $N_{min}$ and $N_{max}$.
+        \item Measure accuracy across all sizes.
+    \end{itemize}
+\end{enumerate}
+
+\subsubsection{Experiment 3.3: Predictability of the Valley Pattern}
+
+\begin{enumerate}
+    \item \textbf{Data Collection:}
+    \begin{itemize}
+        \item Collect performance data from Experiments 3.1 and 3.2 across all graph sizes.
+    \end{itemize}
+
+    \item \textbf{Analysis:}
+    \begin{itemize}
+        \item Analyze the relationship between training sizes and performance at intermediate sizes.
+        \item Investigate if the performance drop at intermediate sizes follows a predictable pattern.
+        \item investigate if the output values for the two classes follow a predictable pattern, and if it is possible to create a threshold value function as a function of nodes.
+    \end{itemize}
+    
+
+\end{enumerate}
+
+\subsection{Results Visualization}
+\begin{itemize}
+    \item Plots showing the accuracy for graphs of each intermediate size, showing the presence of valleys.
+    \item Range of activation values as a function of class and node count. E.g. mean with 25th and 75th percentile.
+\end{itemize}
+ 
+\section{Experiment 4: Investigating the influence of graph size and number of datapoints}
+
+\begin{enumerate}
+    \item Test $(r=2,s=3)$ and $(r=3,s=4)$
+    \item Graph sizes: $2^7,...,2^10$
+    \item Data point size: $2^5,...,2^10$
+    \item $1$ layer of [1,2,4,8,16,32,64,128] 
+\end{enumerate}
+
+\section{Experiment 5:}
+
+Experiment 4 suggests that a single neuron is able to distinguish $2$-colorable graphs from graphs with a $3$ clique, and $3$-colorable graphs with graphs with a $4$ clique. At least when graphs are sampled at random. It would be good to do a theoretical analysis. 
+
+\begin{enumerate}
+\item A graph neural network with a single neuron per node is essentially a 
+threshhold circuit of depth 2. A single root neuron and one neuron per node. 
+\item It may be the case that there is some theoretical result saying that circuits of low depth do not distinguish $r$-colorable graphs from graphs with $(r+1)$-cliques. 
+\item In the opposite direction there may be some work stating that such grapsh are easy to disguish at random. 
+\item In this last case, one may try to use the probabilistic method to show that with probability greater than 0, there is some network of depth at most 2 distinguishing $r$-colorable graphs from graphs with $(r+1)$-cliques. 
+\item Another interesting question is to simply try to come up with the weights. (but it seems that the weights are the same)
+\item This suggests the following simple algorithm: Compute the average the degree of the graph, and if this degree is greater than something, the graph has a clique, and if its smaller than something the graph is 2-colorable. It looks like this works because when the graph is big, fixing the $k$ clique has very little influence on the statistics of the edges involing the other $n-k$. While when you choose a partition, this significanlty affects the probabiliy within a cell. 
+\item This basically gives explanation of why a single neuron can distinguish $r$-colorable graphs from graphs with $r+1$-cliques. In the first case, the average degree will be likely ($\frac{(r-1)n}{2r}$) while the average of a big graph with a $r+1$ clique is still be about $\frac{n}{2}$. 
+\item So the algorithm simply chooses the number between $n/2$ and $n/2r$. If it is bigger than this, the graph has a clique, if it is smaller the graph is $r$ colorable. 
+\item It would be good to construct an explicit family of graphs that cannot be distinguisehd in this way. 
+\end{enumerate}

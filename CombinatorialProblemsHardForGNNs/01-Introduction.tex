@@ -1,0 +1,58 @@
+\section{Introduction}
+\begin{itemize}
+    \item Graphs neural networks are used for ... 
+    \item Recently, there has been increased interest in using graph neural networks for solving mathematical, and combinatorial problems, ... 
+
+    \item Examples of successful results in this vein are ... 
+    \item The clique-colouring principle is ... 
+    \item This principle has been a fundamental tool in proof complexity theory, and it has been shown to be hard for ... (lots of proof systems. See my paper with Pavel Pudlak)
+    \item It is worth noting that graph neural networks can compute non-monotone functions, such as ... 
+    \item Graph neural networks can be generalised to r-dimensions, with increasing expressive power. 
+
+\end{itemize}
+
+\subsection{Random graphs: }
+
+\begin{enumerate}
+    \item The clique colouring principle is very easy for (Normal) neural networks on the average case under the stardard distribution, that means where we select an edge with probability $1/2$. 
+         (Check whether this works also for graphs neural networks. )
+         (Check whether this works for other sampling probabilities. This may be the case for any fixed p)
+         
+    \item There is a specific distribution where (Normal) neural networks cannot distinguish the graphs. That is confirmed empirically.
+        
+\end{enumerate}
+
+
+\subsection{Pinpointing speficic hard families:} 
+
+\begin{enumerate}
+    \item We show that for each $k\geq3$ no graph neural network can determine whether an arbitrary graph has a k-clique or whether it is k-colorable. More precisely, for each fixed k, we exhibit an 
+infinite family of pairs of graphs ${(G_s^k,H_s^k)}_{s\in N}$  satisfying the following properties for each $s\in N$. 
+    \begin{enumerate}
+        \item $G_s^k$ contains a k-clique and $H_s^k$ is $(k-1)$-colorable
+        \item No graph neural network can disguise $G_s^k$ from $H_s^k$. In other words, such a network N either accepts both graphs or rejects both graphs.
+    \end{enumerate}
+    \item We generalise our result for higher dimensions. More specifically, for any dimension r, and any k, there is a family of pairs of graphs ${(G[r,k,s],H[r,k,s])}_{s\in N}$ such that,
+    \begin{enumerate}
+        \item $G[r,k,s]$ contains a $k$-clique and $H[r,k,s]$ is (k-1)-colorable 
+        \item No r-dimensional graph neural network can dustinguish $G[r,k,s]$ from $H[r,k,s]$
+    \end{enumerate}
+\end{enumerate}
+
+\subsection{Some comments}
+
+\begin{itemize}
+    \item To be confirmed: The $(k-1)$-coloring problem is NP-complete for each $k\geq3$. Nevertheless, there is a polynomial time algorithm that distinguishes graphs 
+that have $k$-cliques from graphs that are $(k-1)$-colorable. The algorithm uses the Lovas Theta function. (CHECK THIS! It may be the case that this works for a speficic subclass of graphs)
+
+    CHECKED: For every fixed $k \ge 3$, deciding whether a graph is $(k-1)$-colorable is NP-complete. However, the \emph{promise problem} of distinguishing graphs that contain a $k$-clique from graphs that are $(k-1)$-colorable can be solved in polynomial time using the Lovász $\vartheta$-function: by the sandwich theorem $\omega(G) \le \vartheta(\overline{G}) \le \chi(G)$, so under the promise we obtain a gap---$\vartheta(\overline{G}) \ge k$ in the first case and $\vartheta(\overline{G}) \le k-1$ in the second---allowing us to separate the two via an efficiently computable approximation of $\vartheta$. This does not contradict NP-completeness because only the gap/promise version becomes tractable.
+
+    \item Therefore, we show a class of graphs that that can be distinguished easily by polynomial time algorithms but are provably impossible from being distihguished by GNNS even in higher dimensions.
+
+  \item  Our impossibility results are unconditional and do not require any complexity theoretic assumption. 
+     
+  
+\end{itemize}
+
+
+

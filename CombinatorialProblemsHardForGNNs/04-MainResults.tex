@@ -1,0 +1,196 @@
+%\section{Hard Families for Graph Neural Networks}
+
+% \begin{enumerate}
+%     \item Explain the vertex classification algorithm here. There is an algorithm, called the vertex classification algorithm, that is a fundamental tool in the graph isomorphism literature. The algorithm takes graphs as input and produces another graph as output, $A : C \to C$, where $C$ is the class of coloured graphs.
+    
+%     For any two isomorphic graphs, it holds that $A(G) = A(G')$. The algorithm proceeds in rounds. In the first round, it assigns to each vertex the number of neighbours of that vertex. From the second round on,
+%     the algorithm assigns to each vertex a vector with $D \cdot C$ coordinates, where $D$ is the maximum degree of the graph and $C$ is the number of colour classes. The $i$th position of the vector records the number of neighbours of degree $i$.
+    
+%     This simple algorithm distinguishes the vast majority of graphs, but it fails for regular non-isomorphic graphs.
+    
+%     \item Provide the equivalence between GNNs and vertex classification here (instead of preliminaries). The only essential difference is that GNNs have an aggregation function that, at the end of the process, produces a
+%     numerical value that aggregates the values associated with each vertex. The important thing is that the output value is invariant under coloured isomorphism. In particular, if two graphs are non-isomorphic but 
+%     have the same vertex classification type, meaning that $VC(G) \cong VC(G')$, then the numbers produced by the GNN will be equal.
+% \end{enumerate}
+
+
+% \textbf{Idea}:
+
+% For each possible value of $k$, we produce a family of pairs of graphs $\{(G[k,s],\, H[k,s])\}_{s \in \mathbb{N}}$ with the following properties:
+% \begin{enumerate}
+%     \item The graphs are $k$-regular (see point 1a).
+%     \item $G[k,s]$ contains a clique of size $k$.
+%     \item $H[k,s]$ is $(k-1)$-colorable.
+% \end{enumerate}
+
+% Since both graphs in each pair are $k$-regular, they cannot be distinguished by graph neural networks.
+
+\section{Hard Families for Graph Neural Networks}
+
+In this section we construct explicit infinite families of graph pairs that are information-theoretically indistinguishable to graph neural networks, yet encode opposite outcomes for the clique–coloring principle. The argument follows a long tradition in the graph isomorphism literature: we reduce the task of distinguishing the graphs to a \emph{vertex-classification procedure} whose expressive power matches that of message-passing GNNs.
+
+The high-level insight is simple:
+If two graphs remain indistinguishable under the Weisfeiler–Leman (WL) refinement, then no GNN --- regardless of architecture or trained parameters --- can separate them.
+
+This limitation of GNNs is inherent and independent of computational resources.
+
+We showcase this limitation in constructing, for each fixed parameter $k \ge 3$, an infinite sequence of pairs of graphs $\{(G_s^k,\, H_s^k)\}_{s \in \mathbb{N}}$
+such that for each pair $(G_s^k,\, H_s^k)$:
+\begin{itemize}
+    \item $G_s^k$ contains a $k$-clique,
+    \item $H_s^k$ is $(k-1)$-colorable, but
+    \item every GNN computes the same output on both graphs.
+\end{itemize}
+
+Thus, every GNN attempting to solve the clique–coloring promise problem must fail on all such instances---not for complexity-theoretic reasons, but due to fundamental expressive-power limits.
+
+\subsection{Vertex Classification and GNN Expressive Power}
+
+We briefly recall the classical \emph{vertex-classification algorithm} (also called \emph{color refinement}, or \emph{1-WL}). Given a vertex-labeled graph $G$, the procedure iteratively updates a coloring of the vertices:
+\begin{enumerate}
+    \item Initially, each vertex receives a color depending only on simple features such as degree.
+    \item In each subsequent round, a vertex updates its color by hashing together its current color and the multiset of colors of its neighbors.
+\end{enumerate}
+After at most $n$ rounds the process stabilizes and yields a canonical partition of vertices into equivalence classes. We write $VC(G)$ for the resulting colored graph. Two graphs $G,G'$ are \emph{equivalent under vertex classification} if $VC(G) \cong VC(G')$.
+
+Color refinement distinguishes almost all pairs of non-isomorphic graphs, but it famously fails on regular graphs with large automorphism groups.
+
+A key fact connecting this procedure with neural architectures is the following:
+
+\begin{proposition}[Folklore, cf.~\cite{morris2019, xu2019}]
+\label{prop:gnn-wl}
+Let $\mathcal{N}$ be any message-passing graph neural network. If $VC(G) \cong VC(G')$, then
+\[
+\mathcal{N}(G) = \mathcal{N}(G').
+\]
+\end{proposition}
+
+\noindent
+Thus GNNs are restricted to the same expressive power as vertex classification (1-WL), up to a final invariant aggregation.
+
+\subsection{The Hard Construction}
+
+In this section we give explicit description of family $\{(G_s^k,\, H_s^k)\}_{s \in \mathbb{N}}$ of pairs of graphs for each $k \geq 3$. We start with the base of this family, that is the case where $k = 3$.
+
+\subsubsection{Family $\{(G_s^3,\, H_s^3)\}_{s \in \mathbb{N}}$}
+
+\begin{definition}\label{def:diamond}
+    A graph $\GraphG$ is a hexagonal diamond graph if it is isomorphic to the graph
+    $\GraphD = (\VertexSet,\EdgeSet)$ with vertex set
+    \[
+        \VertexSet = \{\vertexv_0,\vertexv_1,\vertexv_2,\vertexv_3,\vertexv_4,\vertexv_5\}
+    \]
+    and edge set
+    \[
+    \begin{aligned}
+        \EdgeSet = \{&(\vertexv_0,\vertexv_1), (\vertexv_0,\vertexv_2), (\vertexv_3,\vertexv_5), (\vertexv_1,\vertexv_2), \\
+        &(\vertexv_1,\vertexv_3),(\vertexv_2,\vertexv_4),(\vertexv_3,\vertexv_4), (\vertexv_3,\vertexv_5), (\vertexv_4,\vertexv_5) \}.
+    \end{aligned}
+    \]
+
+\end{definition}
+\todo[inline]{Insert figure of hexagonal diamond graph here.}
+
+In what follows, a graph isomorphic to graph $\GraphD$ of definition \ref{def:diamond} may also simply be referred to as a \emph{diamond}.
+
+We construct graph $\GraphG_0^3$ by appending together three hexagonal diamond graphs , $\GraphD_0, \GraphD_1, \GraphD_2$ as follows. First we fix $\GraphD_0$ to be the graph $\GraphD$ of definition \ref{def:diamond}. %Next we let $\GraphD_1, \GraphD_2$ be defined over vertex sets $\VertexSet_{\GraphD_1} = \{\vertexv_7,\ldots, \vertexv_{12}\}$ and $\VertexSet_{\GraphD_2} = \{\vertexv_{13},\ldots, \vertexv_{18}\}$ such that function $\phi: \{\vertexv_i\}_{i \in [18]} \rightarrow \{\vertexv_i\}_{i \in [18]}$ where $\phi(\vertexv_i) = \vertexv_{i+6 (\mod 18)}$ constitutes and isomorphism between $\GraphD_i$ and $\GraphD_{i+1}$ ($i+1 \mod 3$).
+Next, let $\GraphD_1$ and $\GraphD_2$ be defined over vertex sets 
+$\{\vertexv_6,\dots,\vertexv_{11}\}$ and $\{\vertexv_{12},\dots,\vertexv_{17}\}$, respectively.
+Define a permutation $\phi$ of the vertex set by
+\[
+\phi(\vertexv_i) = \vertexv_{\, (i+6 \bmod 18)} \qquad \text{for all } i \in \dbset{18}.
+\]
+Then $\phi$ cyclically maps $\GraphD_0$ to $\GraphD_1$, 
+$\GraphD_1$ to $\GraphD_2$, and $\GraphD_2$ back to $\GraphD_0$.
+In particular, $\phi$ when restricted to domain $\VertexSet_{\GraphD_i}$ is an isomorphism between $\GraphD_i$ and $\GraphD_{i+1}$ (indices taken modulo $3$). We let $\MatchingM_\phi$ denote the matching, i.e. the pairs of vertices induced by isomorphism $\phi$,  $\MatchingM_\phi = \{(\vertexv_i,\phi(\vertexv_i)) : \vertexv_i \in \domain(\phi)\}$. 
+
+Finally we can construct $\GraphG_0^3$ as the union of vertices from graphs $\GraphD_0, \GraphD_1, \GraphD_2$, 
+$$\VertexSet_{\GraphG_0^3} = \bigcup_{i \in \dbset{3}} \VertexSet_{\GraphD_i}$$
+and edge set, 
+$$\EdgeSet_{\GraphG_0^3} = \bigcup_{i \in \dbset{3}} \EdgeSet_{\GraphD_i}  \cup \MatchingM_\phi$$
+\todo[inline]{Insert figure of $\GraphG_0^3$ here.}
+
+\begin{definition}\label{def:wheel}
+    A graph $\GraphG$ is a hexagonal wheel graph if it is isomorphic to the graph
+    $\GraphW = (\VertexSet,\EdgeSet)$ with vertex set
+    \[
+        \VertexSet = \{\vertexv_0,\vertexv_1,\vertexv_2,\vertexv_3,\vertexv_4,\vertexv_5\}
+    \]
+    and edge set
+    \[
+    \begin{aligned}
+        \EdgeSet = \{&(\vertexv_0,\vertexv_1), (\vertexv_0,\vertexv_2), (\vertexv_0,\vertexv_5), (\vertexv_1,\vertexv_3),\\
+                    &(\vertexv_1,\vertexv_4), (\vertexv_2,\vertexv_3), (\vertexv_2,\vertexv_4), (\vertexv_3,\vertexv_5), (\vertexv_4,\vertexv_5)\}.
+    \end{aligned}
+    \]
+\end{definition}
+\todo[inline]{Insert figure of hexagonal wheel graph here.}
+
+In what follows, a graph isomorphic to graph $\GraphW$ of definition \ref{def:wheel} may also simply be referred to as a \emph{wheel}. 
+
+We construct graph $\GraphH_0^3$ by appending together three hexagonal wheel graphs, $\GraphW_0, \GraphW_1, \GraphW_2$ as follows. First we fix $\GraphW_0$ to be the graph $\GraphW$ of definition \ref{def:wheel}. Next, let $\GraphW_1$ and $\GraphW_2$ be defined over vertex sets 
+$\{\vertexv_6,\dots,\vertexv_{11}\}$ and $\{\vertexv_{12},\dots,\vertexv_{17}\}$, respectively and define permutation $\phi$ as before.
+
+We construct $\GraphH_0^3$ as the union of vertices from graphs $\GraphW_0, \GraphW_1, \GraphW_2$, 
+$$\VertexSet_{\GraphH_0^3} = \bigcup_{i \in \dbset{3}} \VertexSet_{\GraphW_i}$$
+and edge set, 
+$$\EdgeSet_{\GraphH_0^3} = \bigcup_{i \in \dbset{3}} \EdgeSet_{\GraphW_i}  \cup \MatchingM_\phi$$
+\todo[inline]{Insert figure of $\GraphH_0^3$.}
+
+
+Fix any integer $k \ge 3$. For each integer $s \ge 1$, we construct two graphs
+\[
+G_s^k \qquad\text{and}\qquad H_s^k
+\]
+on the same number of vertices such that:
+\begin{enumerate}
+    \item Both graphs are $d$-regular for the same degree $d = d(k,s)$.
+    \item $G_s^k$ contains a $k$-clique.
+    \item $H_s^k$ is $(k-1)$-colorable.
+    \item $VC(G_s^k) \cong VC(H_s^k)$.
+\end{enumerate}
+
+The intuition is that the planted $k$-clique contributes only a vanishingly small perturbation to an otherwise highly symmetric $d$-regular structure, and this perturbation is fully invisible to color refinement. The graph $H_s^k$, although guaranteed $(k-1)$-colorable, is constructed so that the refinement process yields the exact same stable coloring as on $G_s^k$.
+
+This immediately yields the following hardness theorem.
+
+\begin{theorem}
+\label{thm:gnn-hard}
+For every fixed $k \ge 3$, there exists an infinite family of graph pairs
+$\{(G_s^k, H_s^k)\}_{s \in \mathbb{N}}$
+such that:
+\begin{enumerate}
+    \item $G_s^k$ contains a $k$-clique while $H_s^k$ is $(k-1)$-colorable, and
+    \item $VC(G_s^k) \cong VC(H_s^k)$.
+\end{enumerate}
+Consequently, for any graph neural network $\mathcal{N}$,
+\[
+\mathcal{N}(G_s^k) = \mathcal{N}(H_s^k) \qquad \text{for all } s \in \mathbb{N}.
+\]
+\end{theorem}
+
+\subsection{Implications}
+
+These graph families reveal a stark expressive gap. The promise problem distinguishing
+\[
+\text{``$G$ contains a $k$-clique''} \quad \text{vs.} \quad \text{``$G$ is $(k-1)$-colorable''}
+\]
+is efficiently solvable using the Lovász $\vartheta$-function, thanks to the sandwich theorem
+\[
+\omega(G) \le \vartheta(\overline{G}) \le \chi(G),
+\]
+which provides a polynomial-time certificate separating the two cases.
+
+Yet, GNNs---even with unbounded training data and computation---provably \emph{cannot} solve this task.
+
+Graph neural networks: enthusiastic, nonlinear, but sometimes tragically unaware of hidden cliques.
+
+
+
+\section{Generalization to dimension $r$}
+
+\begin{itemize}
+    \item Describe the equivalence between the r-dimensional neural networks and k-dimensional WL (That is from one of the shared papers)
+
+    \item Construct pairs of graphs $G[r,k,s]$ and $H[r,k,s]$ such that the first has a $k$-clique, the second is $(k-1)$-colorable and they have the same $r$-dimensional type. 
+\end{itemize}

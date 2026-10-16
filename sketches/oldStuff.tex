@@ -1,0 +1,94 @@
+\section{Old Stuff}
+
+
+\subsection{ Exact SAT Formulation for Neural Networks}
+
+Below we formulate Problem \ref{problem:Consistent} as a SAT instance in conjunctive normal form.
+
+\noindent We first introduce the variables of our SAT instance. Below we let $i\in \{1,\dots,m\}$ where $m$ is the number of strings in an $(n,2)$-dataset $D = (D_0,D_1)$, ($m = |D_0 \cup D_1|$), and we let $j\in \{1,\dots, n\}$ be the size of each string in $D$. Moreover, we let 
+\begin{itemize}
+    \item Dataset variables $x_{ij}$: true if and only if bit $j$ of string $i$ is equal to 1. 
+    \item Class variable $cl_{i}$ for $i\in \{1,\dots,m\}$:  True if the $i$-th string belongs to class $D_1$.
+    \item Threshold of a gate $g_{l,j,t}$: true if the threshold of the gate number $j$ at layer number $l$ is equal to $t$. 
+    \item Gate outputs: $go_{i,l,j,b}$ true if the output bit of gate $j$ of layer $l$ is equal to $b$ when evaluating assignment number $i$. 
+    \item Edge variables $e_{l,j,j'}$: Output of gate number $j$ of layer $l$ is an input to gate number $j'$ of layer $l+1$.
+    \item Output variable: $out_{i}$ the output of the network when processing input $i$  
+    \item Counter variables $c_{i,l,j,t}$. This variable is set to $1$ when the cumulative input to gate $j$ of level $l$ is greater than or equal to $t$ upon processing data-point $i$. 
+    \begin{itemize}
+        \item \textbf{Alternative counter variable specification:} Counter variables $c_{i,l,j,j',t}$. These variables are used to count how many inputs of the gate $j$ of level $l$ have been set to $1$ when processing data-point $i$. Here, $t$ is the value of the counter, and $j'$ is an index that over the edges incident with gate $g_{l,j}$.
+    \end{itemize} 
+\end{itemize}
+
+\noindent Next we specify the clauses of our SAT instance: 
+\begin{itemize}
+    \item Dataset clauses: Each variable $x_{ij}$ appears as a unary clause $(x_{ij})$ iff bit $j$ of string $i$ is equal to $1$ and appears negated, $(\neg x_{ij})$, otherwise.
+    \item Class clauses: Each variable $cl_{i}$ appears as a unary clause $(cl_{i})$ iff string $i$ belongs to $D_1$ and appears negated, $(\neg cl_{i})$, otherwise.
+    \item Output clauses: Each variable $out_{i}$ appears as a unary clause $(out_{i})$ iff string $i$ belongs to $D_1$ and appears negated, $(\neg out_{i})$, otherwise. Further, $out_i$ must take value 1 iff the last gate fires: $$out_i \leftrightarrow (go_{i,\delta,1})$$ Additionally, each output variable must be given the same valuation: $$out_{i}\leftrightarrow cl_i$$
+    \item Gate computation clauses:
+    \begin{enumerate}
+        \item Exactly one threshold gate variable should be activated\footnote{This is not necessarily a strict requirement but provides some clarity in analysis. Under the current specifications of our NN, if several threshold variables for the same gate are allowed to be active in our model only the one with the smallest threshold will make any semantic difference.} (a gate should not have two threshold values): 
+        $$\forall l \in [\delta], j \in [\omega]: \bigoplus_{t\in[\tau]} g_{l,j,t}$$ 
+        \item The output of a gate $j$ string $i$ depends on its threshold and the counter variables of that gate upon processing string $i$.
+        $$\forall i \in [m], l \in [\delta], j \in [\omega]: go_{i,l,j} \leftrightarrow \bigvee_{t\in[\tau]} (g_{l,j,t} \land c_{i,l,j,t})$$ 
+    \end{enumerate}
+    \item Counter clauses:
+     \begin{enumerate}
+         \item At level $l=1$, 
+         \item In general, a counter with threshold $t$ for a gate $j$ at level $l$ if and only if some $t$ gates of the previous layer fire and there are edges form these $t$ gates to the current gate in question.
+         
+         Hence $\forall i \in [m], l \in [2, \ldots, \delta-1], j \in [\omega], t \in [\tau]:$
+         $$ c_{i,l,j,t} \leftrightarrow \bigvee_{(a_1,\ldots, a_t) \in {\omega \choose t}}(go_{i,l-1,a_1}\land\dots\land go_{i,l-1,a_t}\land e_{l-1,a_1,j}\land\dots\land e_{l-1,a_t,j}) $$
+         \item At level $l=\delta$,
+     \end{enumerate}
+     
+    The alternative counter clause variables, $c_{i,l,j,j',t}$,can be specified as follows:
+
+     \begin{enumerate}
+     
+        \item We set $c_{i,l,j,j',0} = 1$, for all $i \in [m], l \in [\delta], j,j' \in [\omega]$. This is an auxiliary variable that is only used to initiate the inductive definition of these counter clauses. They will not appear in any other clauses.
+        \item The rest of these counter clauses are defined inductively $\forall i \in [m], l \in [\delta], j,j'\in [\omega], t \in [j']:$
+        $$c_{i,l,j,j',t} \leftrightarrow (c_{i,l,j,j'-1,t-1}\land go_{i,l-1,j}\land e_{l-1,j',j})$$
+         
+     \end{enumerate}
+    
+    
+\end{itemize}
+
+\begin{comment}
+    
+Formulation of Problem \ref{Problem:MainProblem} as a SAT problem:
+\begin{enumerate}
+ 
+\item Variables:
+\begin{itemize}
+\item Dataset variables $x_{ij}$ for $i\in \{1,\dots,m\}$ ($m = | \bigcup_{i \in [k]} D_i|$) and $j\in \{1,\dots, n\}$: true if and only if bit $j$ of string $i$ is equal to 1. 
+\item Class variable $c_{ij}$ for $i\in \{1,\dots,m\}$ and $j\in \{1,\dots,k\}$:  True if the $i$-th string belongs to class $j$.
+\item Weight of a gate $g_{l,j,w}$: true if the weight of the gate number $j$ at layer number $l$ is equal to $w$. 
+\item GateOutputs: $go_{i,l,j,b}$ true if the output bit of gate $j$ of layer $l$ is equal to $b$ when evaluating assignment number $i$. 
+\item Edge variables $e_{l,j,j'}$: Output of gate number $j$ of layer $l$ is an input to gate number $j'$ of layer $l+1$.
+\item Output variable: $out_{i}$ the output of the network when processing input $i$  
+\item Counter variables $c_{i,l,j,j',r}$. These variables are used to count how many inputs of the gate $j$ of level $l$ have been set to $1$ when processing datapoint $i$. Here, $r$ is the value of the counter, and $j'$ is an index that over the edges incident with gate $g_{l,j}$. 
+\end{itemize}
+\item Clauses: 
+\begin{enumerate}
+    \item Dataset clauses: $(x_{ij})$ iff bit $j$ of string $i$ is equal to $1$. 
+    \item Gate computation clauses:
+    \begin{itemize}
+        \item if the weight of gate $j$ of level $l$ is $w$, and the counter for that gate reaches $w$ then the gate is activated 
+    $$(\neg g_{l,j,w} \vee \neg c_{i,l,j,j',w} \neg go_{i,l,j,1})$$. 
+        \item If the partial sum of the last counter variable of gate $g[l,j]$ is than $w$ than the gate is not activated. 
+        $$(\neg g_{l,j,w} \vee \neg c_{i,l,j,j',w'} \neg go_{i,l,j,0}).$$ 
+        \item The counter should propagate correctly. \todo[inline]{Define Clauses}
+    \end{itemize}
+    \item \todo[inline]{Define Remaining Clauses}
+\end{enumerate}
+\end{enumerate}
+
+\end{comment}
+
+
+\section{Approximate SAT Formulation for Neural Networks}
+
+
+% \todo[inline]{Similar to the previous formulation. But now one should define variables that count the number of datapoints that the network evaluates consistently with the dataset.}
+
